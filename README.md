@@ -157,8 +157,17 @@ Element radii are configured in `ELEMENT_RADIUS_MAP`.
 
 ```python
 ELEMENT_RADIUS_MAP = {
-    "Li": 1.3,
-    "N":  0.7,
+    "Li": 0.8,
+    "N":  0.5,
+}
+```
+
+Atom transparency is configured in `ELEMENT_TRANSPARENCY_MAP`. `0.0` is fully opaque and `1.0` is invisible.
+
+```python
+ELEMENT_TRANSPARENCY_MAP = {
+    "Li": 0.0,
+    "N":  0.0,
 }
 ```
 

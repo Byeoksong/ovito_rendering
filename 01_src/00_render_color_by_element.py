@@ -20,9 +20,17 @@ DEFAULT_COLOR = "#B3B3B3"
 
 # Element -> atomic radius used for rendering
 ELEMENT_RADIUS_MAP = {
-    "Li": 1.3,
-    "N":  0.8,
+    "Li": 0.8,
+    "N":  0.5,
 }
+
+# Element -> transparency used for rendering. 0.0 is opaque, 1.0 is invisible.
+ELEMENT_TRANSPARENCY_MAP = {
+    "Li": 0.0,
+    "N":  0.0,
+}
+
+DEFAULT_TRANSPARENCY = 0.0
 
 
 def normalize_color(color):
@@ -50,6 +58,13 @@ def normalize_color(color):
         return tuple(component / 255.0 for component in rgb)
 
     return rgb
+
+
+def validate_transparency(transparency):
+    value = float(transparency)
+    if value < 0.0 or value > 1.0:
+        raise ValueError(f"Transparency must be between 0.0 and 1.0: {transparency}")
+    return value
 
 
 def import_structure_file(path: str):
@@ -129,13 +144,18 @@ def build_modifier():
                 t.radius = ELEMENT_RADIUS_MAP[t.name]
 
         colors = np.empty((n, 3), dtype=float)
+        transparencies = np.empty(n, dtype=float)
 
         for i in range(n):
             type_name = type_id_to_name.get(int(type_ids[i]), None)
             colors[i] = normalize_color(ELEMENT_COLOR_MAP.get(type_name, DEFAULT_COLOR))
+            transparencies[i] = validate_transparency(
+                ELEMENT_TRANSPARENCY_MAP.get(type_name, DEFAULT_TRANSPARENCY)
+            )
 
-        # Overwrite/create Color property
+        # Overwrite/create visual properties
         data.particles_.create_property('Color', data=colors)
+        data.particles_.create_property('Transparency', data=transparencies)
 
     return modify
 
