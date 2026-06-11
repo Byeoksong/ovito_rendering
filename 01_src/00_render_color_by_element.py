@@ -365,10 +365,6 @@ def main():
         vp.type = Viewport.Type.Front
 
     vp.zoom_all(size=(args.width, args.height))
-    if args.view_center is not None or args.view_size is not None:
-        if vp.is_perspective_projection:
-            parser.error("--view-center and --view-size are intended for orthographic cameras: ortho, top, or front")
-        set_manual_view(vp, args.view_center, args.view_size)
     if (
         args.camera_pos is not None
         or args.camera_dir is not None
@@ -376,6 +372,12 @@ def main():
         or args.camera_fov is not None
     ):
         set_manual_camera(vp, args.camera_pos, args.camera_dir, args.camera_up, args.camera_fov)
+    if args.view_center is not None or args.view_size is not None:
+        if vp.is_perspective_projection:
+            parser.error("--view-center and --view-size are intended for orthographic cameras: ortho, top, or front")
+        set_manual_view(vp, args.view_center, args.view_size)
+    if args.camera_fov is not None:
+        vp.fov = args.camera_fov
 
     vp.render_image(
         filename=args.output,

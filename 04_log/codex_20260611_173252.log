@@ -1,0 +1,26 @@
+[2026-06-11 17:32:52] Fixed manual camera and view-center application order.
+
+Context:
+- Manual camera direction was set in `02_script/00_script.sh` while camera position was left unset.
+- Changing `VIEW_CENTER_X` did not visibly move the rendered atoms.
+
+Problem:
+- `00_render_color_by_element.py` applied `VIEW_CENTER` before applying manual camera settings.
+- The view center was therefore computed using the preset camera direction such as `front`.
+- Afterward, `CAMERA_DIR` was applied, so the final render used a different viewing direction than the one used for centering.
+
+Resolution:
+- Reordered camera setup after `vp.zoom_all()`.
+- Manual camera settings are now applied first.
+- `VIEW_CENTER` and `VIEW_SIZE` are applied after the final camera direction is known.
+- `CAMERA_FOV` is re-applied last so an explicit manual zoom value is preserved.
+
+Behavior note:
+- For `CAMERA_DIR=(-1, 0, 0)`, the view direction is along x, so x is the depth axis.
+- In that camera orientation, `VIEW_CENTER_Y` and `VIEW_CENTER_Z` move the visible image plane, while `VIEW_CENTER_X` mostly changes depth.
+
+Validation:
+- python -m py_compile 01_src/00_render_color_by_element.py 01_src/01_png_to_gif.py 01_src/02_shift_coordinate.py 01_src/03_plot_traj.py
+- zsh -n 02_script/00_script.sh
+- zsh -n 02_script/01_script_png_gif.sh
+- Manual camera/view-center function test with `CAMERA_DIR=(-1, 0, 0)` and `VIEW_CENTER=(7, -2, -3)`.
