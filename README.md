@@ -19,6 +19,7 @@ The current workflow is mainly designed for VASP `XDATCAR`-style trajectory file
 │   ├── 00_script.sh
 │   └── 01_script_png_gif.sh
 ├── 03_results/           # Generated PNG/GIF outputs, ignored by git
+├── 04_log/               # Codex change logs
 ├── 99_archieve/          # Archived/reference files, ignored by git
 ├── AGENTS.md
 └── README.md
@@ -91,6 +92,10 @@ Example output files:
 03_results/03_slice/slice_front_2005.png
 ```
 
+## Change Logs
+
+Codex-authored code changes are recorded under `04_log/`. These logs describe what changed, why it changed, and how it was validated.
+
 ### 3. Convert PNG Frames to GIF
 
 Edit the variables in `02_script/01_script_png_gif.sh`.
@@ -127,6 +132,7 @@ Main features:
 - Periodic repetition along lattice vectors `a1`, `a2`, and `a3`
 - z-range filtering
 - `top`, `front`, `ortho`, and `perspective` camera modes
+- Manual camera position/direction/up-vector control
 - Manual viewport center and size control
 - Optional simulation cell hiding
 - Transparent PNG background by default
@@ -188,6 +194,19 @@ python 01_src/00_render_color_by_element.py 00_data/xdatcar_shift \
   --camera top \
   --atom-alpha 0.5 \
   -o 03_results/example_alpha_2000.png
+```
+
+For custom camera angles, pass manual camera vectors:
+
+```bash
+python 01_src/00_render_color_by_element.py 00_data/xdatcar_shift \
+  -f 2000 \
+  --camera ortho \
+  --camera-pos 20 -20 15 \
+  --camera-dir -20 20 -15 \
+  --camera-up 0 0 1 \
+  --camera-fov 8 \
+  -o 03_results/custom_camera_2000.png
 ```
 
 ### `01_src/01_png_to_gif.py`

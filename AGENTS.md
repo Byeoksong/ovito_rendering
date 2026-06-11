@@ -15,5 +15,6 @@ docs/
 │   ├── 00_script.sh
 │   └── 01_script_png_gif.sh
 ├── 03_results/
+├── 04_log/
 ├── 99_archieve/
 └── AGENTS.md

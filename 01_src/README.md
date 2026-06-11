@@ -83,6 +83,10 @@ python 01_src/00_render_color_by_element.py 00_data/xdatcar_shift -f 2000 --came
 - `--width`: Image width in pixels.
 - `--height`: Image height in pixels.
 - `--camera`: Camera mode. Choices: `perspective`, `ortho`, `top`, `front`.
+- `--camera-pos X Y Z`: Manual camera position in Cartesian coordinates.
+- `--camera-dir DX DY DZ`: Manual camera viewing direction vector.
+- `--camera-up UX UY UZ`: Manual camera up vector.
+- `--camera-fov`: Manual camera field of view. For orthographic cameras, this is the viewport size in Cartesian units.
 - `--atom-alpha`: Global atom opacity for this render. `0.0` is invisible and `1.0` is opaque. This overrides `ELEMENT_TRANSPARENCY_MAP`.
 - `--transparent-background`: Render PNG with a transparent background. This is the default.
 - `--opaque-background`: Render PNG with an opaque white background.
@@ -153,6 +157,23 @@ These options are intended for orthographic cameras: `top`, `front`, and `ortho`
 Units are Cartesian coordinate units from the input file. For VASP `XDATCAR`/`POSCAR` files, this is typically angstrom.
 
 `--view-size` controls the vertical size of the orthographic viewport. The horizontal range depends on the image aspect ratio.
+
+### Manual Camera Angles
+
+Use `--camera-pos`, `--camera-dir`, and `--camera-up` to set a custom camera angle instead of relying only on `top` or `front`.
+
+```bash
+python 01_src/00_render_color_by_element.py 00_data/xdatcar_shift \
+  -f 2000 \
+  --camera ortho \
+  --camera-pos 20 -20 15 \
+  --camera-dir -20 20 -15 \
+  --camera-up 0 0 1 \
+  --camera-fov 8 \
+  -o 03_results/custom_camera_2000.png
+```
+
+`--camera-pos` sets where the camera is placed. `--camera-dir` sets the direction it looks toward. `--camera-up` controls image roll. `--camera-fov` controls zoom for orthographic cameras.
 
 ### Background Transparency
 

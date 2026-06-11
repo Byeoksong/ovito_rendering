@@ -35,10 +35,10 @@ DEFAULT_TRANSPARENCY = 0.0
 # Tachyon rendering style. Toggle these values in code as needed.
 RENDER_AMBIENT_OCCLUSION = True           # Adds contact shading between nearby/overlapping atoms to emphasize depth.
 RENDER_AMBIENT_OCCLUSION_BRIGHTNESS = 0.8 # Controls ambient occlusion brightness; lower values make shaded regions darker.
-RENDER_AMBIENT_OCCLUSION_SAMPLES = 20     # Number of ambient occlusion samples; higher values reduce noise but render slower.
+RENDER_AMBIENT_OCCLUSION_SAMPLES = 12     # Number of ambient occlusion samples; higher values reduce noise but render slower.
 RENDER_SHADOWS = True                     # Enables cast shadows from direct lighting; may be less useful with transparent backgrounds.
 RENDER_ANTIALIASING = True                # Smooths jagged pixel edges around atoms.
-RENDER_ANTIALIASING_SAMPLES = 20          # Number of antialiasing samples; higher values smooth edges more but render slower.
+RENDER_ANTIALIASING_SAMPLES = 12          # Number of antialiasing samples; higher values smooth edges more but render slower.
 RENDER_DIRECT_LIGHT = True                # Enables directional lighting, making spheres look more three-dimensional.
 RENDER_DIRECT_LIGHT_INTENSITY = 1.0       # Strength of direct lighting; higher values increase highlights and contrast.
 
@@ -198,6 +198,27 @@ def set_manual_view(vp: Viewport, center: tuple[float, float, float] | None, siz
         vp.fov = size
 
 
+def set_manual_camera(
+    vp: Viewport,
+    camera_pos: tuple[float, float, float] | None,
+    camera_dir: tuple[float, float, float] | None,
+    camera_up: tuple[float, float, float] | None,
+    camera_fov: float | None,
+):
+    if camera_pos is not None:
+        vp.camera_pos = camera_pos
+    if camera_dir is not None:
+        if np.linalg.norm(np.asarray(camera_dir, dtype=float)) == 0:
+            raise RuntimeError("The manual camera direction vector has zero length.")
+        vp.camera_dir = camera_dir
+    if camera_up is not None:
+        if np.linalg.norm(np.asarray(camera_up, dtype=float)) == 0:
+            raise RuntimeError("The manual camera up vector has zero length.")
+        vp.camera_up = camera_up
+    if camera_fov is not None:
+        vp.fov = camera_fov
+
+
 def build_renderer():
     renderer = TachyonRenderer()
     renderer.ambient_occlusion = RENDER_AMBIENT_OCCLUSION
@@ -221,6 +242,36 @@ def main():
     parser.add_argument("--width", type=int, default=1800, help="Image width in pixels")
     parser.add_argument("--height", type=int, default=1400, help="Image height in pixels")
     parser.add_argument("--camera", choices=["perspective", "ortho", "top", "front"], default="perspective")
+    parser.add_argument(
+        "--camera-pos",
+        type=float,
+        nargs=3,
+        metavar=("X", "Y", "Z"),
+        default=None,
+        help="Manual camera position in Cartesian coordinates.",
+    )
+    parser.add_argument(
+        "--camera-dir",
+        type=float,
+        nargs=3,
+        metavar=("DX", "DY", "DZ"),
+        default=None,
+        help="Manual camera viewing direction vector.",
+    )
+    parser.add_argument(
+        "--camera-up",
+        type=float,
+        nargs=3,
+        metavar=("UX", "UY", "UZ"),
+        default=None,
+        help="Manual camera up vector.",
+    )
+    parser.add_argument(
+        "--camera-fov",
+        type=float,
+        default=None,
+        help="Manual camera field of view. For orthographic cameras, this is the viewport size in Cartesian units.",
+    )
     parser.add_argument(
         "--atom-alpha",
         type=float,
@@ -318,6 +369,13 @@ def main():
         if vp.is_perspective_projection:
             parser.error("--view-center and --view-size are intended for orthographic cameras: ortho, top, or front")
         set_manual_view(vp, args.view_center, args.view_size)
+    if (
+        args.camera_pos is not None
+        or args.camera_dir is not None
+        or args.camera_up is not None
+        or args.camera_fov is not None
+    ):
+        set_manual_camera(vp, args.camera_pos, args.camera_dir, args.camera_up, args.camera_fov)
 
     vp.render_image(
         filename=args.output,

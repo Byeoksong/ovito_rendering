@@ -1,0 +1,22 @@
+[2026-06-11 16:02:20] Clarified logging workflow and reverted runtime logging.
+
+Context:
+- The requested log files are for Codex code-change history, not for every shell script execution.
+- The previous implementation incorrectly added runtime logging to `02_script/00_script.sh`.
+
+Problem:
+- `02_script/00_script.sh` was modified to create `04_log/render_YYYYMMDD_HHMMSS.log` on every render run.
+- `.gitignore` was modified to ignore `04_log/*.log`, which would also hide Codex work logs.
+- README files described `04_log/` as a runtime render log directory.
+
+Resolution:
+- Removed runtime log creation from `02_script/00_script.sh`.
+- Removed `04_log/*.log` from `.gitignore` so Codex change logs can be tracked.
+- Kept `04_log/` as the directory for Codex work logs.
+- Updated README documentation to describe `04_log/` as the location for Codex-authored change logs.
+- Kept `AGENTS.md` updated with the `04_log/` directory.
+
+Validation:
+- zsh -n 02_script/00_script.sh
+- zsh -n 02_script/01_script_png_gif.sh
+- python -m py_compile 01_src/00_render_color_by_element.py 01_src/01_png_to_gif.py 01_src/02_shift_coordinate.py 01_src/03_plot_traj.py
