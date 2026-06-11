@@ -20,14 +20,14 @@ DEFAULT_COLOR = "#B3B3B3"
 
 # Element -> atomic radius used for rendering
 ELEMENT_RADIUS_MAP = {
-    "Li": 0.8,
-    "N":  0.5,
+    "Li": 0.4,
+    "N":  0.2,
 }
 
 # Element -> transparency used for rendering. 0.0 is opaque, 1.0 is invisible.
 ELEMENT_TRANSPARENCY_MAP = {
-    "Li": 0.0,
-    "N":  0.0,
+    "Li": 0.6,
+    "N":  0.6,
 }
 
 DEFAULT_TRANSPARENCY = 0.0
@@ -64,6 +64,13 @@ def validate_transparency(transparency):
     value = float(transparency)
     if value < 0.0 or value > 1.0:
         raise ValueError(f"Transparency must be between 0.0 and 1.0: {transparency}")
+    return value
+
+
+def validate_alpha(alpha):
+    value = float(alpha)
+    if value < 0.0 or value > 1.0:
+        raise ValueError(f"Alpha must be between 0.0 and 1.0: {alpha}")
     return value
 
 
@@ -124,7 +131,7 @@ def build_z_range_filter(z_min: float | None, z_max: float | None, coordinate: s
     return modify
 
 
-def build_modifier():
+def build_modifier(atom_alpha: float | None = None):
     def modify(frame, data):
         particles = data.particles
         if particles is None:
@@ -145,13 +152,17 @@ def build_modifier():
 
         colors = np.empty((n, 3), dtype=float)
         transparencies = np.empty(n, dtype=float)
+        alpha = validate_alpha(atom_alpha) if atom_alpha is not None else None
 
         for i in range(n):
             type_name = type_id_to_name.get(int(type_ids[i]), None)
             colors[i] = normalize_color(ELEMENT_COLOR_MAP.get(type_name, DEFAULT_COLOR))
-            transparencies[i] = validate_transparency(
-                ELEMENT_TRANSPARENCY_MAP.get(type_name, DEFAULT_TRANSPARENCY)
-            )
+            if alpha is None:
+                transparencies[i] = validate_transparency(
+                    ELEMENT_TRANSPARENCY_MAP.get(type_name, DEFAULT_TRANSPARENCY)
+                )
+            else:
+                transparencies[i] = 1.0 - alpha
 
         # Overwrite/create visual properties
         data.particles_.create_property('Color', data=colors)
@@ -187,6 +198,12 @@ def main():
     parser.add_argument("--width", type=int, default=1800, help="Image width in pixels")
     parser.add_argument("--height", type=int, default=1400, help="Image height in pixels")
     parser.add_argument("--camera", choices=["perspective", "ortho", "top", "front"], default="perspective")
+    parser.add_argument(
+        "--atom-alpha",
+        type=float,
+        default=None,
+        help="Global atom opacity for this render. 0.0 is invisible, 1.0 is opaque. Overrides ELEMENT_TRANSPARENCY_MAP.",
+    )
     parser.add_argument(
         "--transparent-background",
         dest="transparent_background",
@@ -235,6 +252,8 @@ def main():
 
     if args.z_min is not None and args.z_max is not None and args.z_min > args.z_max:
         parser.error("--z-min must be smaller than or equal to --z-max")
+    if args.atom_alpha is not None and (args.atom_alpha < 0.0 or args.atom_alpha > 1.0):
+        parser.error("--atom-alpha must be between 0.0 and 1.0")
     repeat_a1, repeat_a2, repeat_a3 = args.repeat_a
     if repeat_a1 < 1 or repeat_a2 < 1 or repeat_a3 < 1:
         parser.error("--repeat-a values must be positive integers")
@@ -254,7 +273,7 @@ def main():
         )
     if args.z_min is not None or args.z_max is not None:
         pipeline.modifiers.append(build_z_range_filter(args.z_min, args.z_max, args.z_coordinate))
-    pipeline.modifiers.append(build_modifier())
+    pipeline.modifiers.append(build_modifier(atom_alpha=args.atom_alpha))
     if args.hide_cell:
         pipeline.modifiers.append(build_cell_visibility_modifier(show_cell=False))
 

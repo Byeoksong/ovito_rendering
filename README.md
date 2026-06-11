@@ -122,6 +122,7 @@ Main features:
 
 - Element-based atom coloring
 - Per-element rendering radius
+- Per-element transparency or frame-dependent global atom alpha
 - XDATCAR frame selection
 - Periodic repetition along lattice vectors `a1`, `a2`, and `a3`
 - z-range filtering
@@ -169,6 +170,16 @@ ELEMENT_TRANSPARENCY_MAP = {
     "Li": 0.0,
     "N":  0.0,
 }
+```
+
+For frame-dependent fade-in rendering, pass `--atom-alpha`. `0.0` is invisible and `1.0` is fully opaque.
+
+```bash
+python 01_src/00_render_color_by_element.py 00_data/xdatcar_shift \
+  -f 2000 \
+  --camera top \
+  --atom-alpha 0.5 \
+  -o 03_results/example_alpha_2000.png
 ```
 
 ### `01_src/01_png_to_gif.py`

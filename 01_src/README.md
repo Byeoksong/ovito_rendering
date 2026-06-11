@@ -39,6 +39,16 @@ ELEMENT_TRANSPARENCY_MAP = {
 }
 ```
 
+For frame-dependent fade-in rendering, use `--atom-alpha`. This uses alpha semantics: `0.0` is invisible and `1.0` is fully opaque.
+
+```bash
+python 01_src/00_render_color_by_element.py 00_data/xdatcar_shift \
+  -f 2000 \
+  --camera top \
+  --atom-alpha 0.5 \
+  -o 03_results/example_alpha_2000.png
+```
+
 ### Basic Usage
 
 Render a single frame:
@@ -65,6 +75,7 @@ python 01_src/00_render_color_by_element.py 00_data/xdatcar_shift -f 2000 --came
 - `--width`: Image width in pixels.
 - `--height`: Image height in pixels.
 - `--camera`: Camera mode. Choices: `perspective`, `ortho`, `top`, `front`.
+- `--atom-alpha`: Global atom opacity for this render. `0.0` is invisible and `1.0` is opaque. This overrides `ELEMENT_TRANSPARENCY_MAP`.
 - `--transparent-background`: Render PNG with a transparent background. This is the default.
 - `--opaque-background`: Render PNG with an opaque white background.
 - `--repeat-a A1 A2 A3`: Repeat the structure along lattice vectors `a1`, `a2`, and `a3`.
@@ -167,6 +178,7 @@ python 01_src/00_render_color_by_element.py "$INPUT" \
   -o "${FILE_NAME}_top_${FRAME}.png" \
   --repeat-a "$REPEAT_A1" "$REPEAT_A2" "$REPEAT_A3" \
   --camera top \
+  --atom-alpha "$ATOM_ALPHA" \
   --width "$WIDTH" --height "$HEIGHT" \
   "${VIEW_OPTIONS[@]}" \
   --transparent-background \
@@ -174,6 +186,15 @@ python 01_src/00_render_color_by_element.py "$INPUT" \
 ```
 
 Set `FRAME_INITIAL`, `FRAME_FINAL`, and `FRAME_INTERVAL` in `02_script/00_script.sh` to generate a PNG sequence.
+
+`02_script/00_script.sh` also supports frame-dependent atom opacity:
+
+```bash
+ALPHA_INITIAL="0.1"
+ALPHA_FINAL="1.0"
+```
+
+With these values, atoms fade in linearly from alpha `0.1` at `FRAME_INITIAL` to alpha `1.0` at `FRAME_FINAL`.
 
 ### XDATCAR Filename Note
 
