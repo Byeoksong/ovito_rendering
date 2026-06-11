@@ -1,61 +1,67 @@
 # OVITO Rendering Workflow
 
-OVITO Python API를 이용해 atomistic trajectory의 특정 frame들을 PNG 이미지로 렌더링하고, 생성된 PNG들을 GIF 애니메이션으로 변환하는 작업용 repository입니다.
+This repository contains a small OVITO-based workflow for rendering atomistic trajectory frames as PNG images and converting the generated PNG sequence into GIF animations.
 
-현재 workflow는 주로 XDATCAR 계열 trajectory를 대상으로 합니다.
+The current workflow is mainly designed for VASP `XDATCAR`-style trajectory files.
 
 ## Repository Structure
 
 ```text
 .
-├── 00_data/              # local input data, ignored by git
+├── 00_data/              # Local input data, ignored by git
 ├── 01_src/               # Python source code
 │   ├── 00_render_color_by_element.py
 │   ├── 01_png_to_gif.py
 │   ├── 02_shift_coordinate.py
 │   ├── 03_plot_traj.py
 │   └── README.md
-├── 02_script/            # shell workflow scripts
+├── 02_script/            # Shell workflow scripts
 │   ├── 00_script.sh
 │   └── 01_script_png_gif.sh
-├── 03_results/           # generated PNG/GIF outputs, ignored by git
-├── 99_archieve/          # archived/reference files, ignored by git
+├── 03_results/           # Generated PNG/GIF outputs, ignored by git
+├── 99_archieve/          # Archived/reference files, ignored by git
 ├── AGENTS.md
 └── README.md
 ```
 
-`00_data/`, `03_results/`, `99_archieve/`는 `.gitignore`에 포함되어 GitHub에는 업로드되지 않습니다.
+The following directories are intentionally ignored by git:
+
+- `00_data/`
+- `03_results/`
+- `99_archieve/`
+
+Input data and generated outputs should be managed locally.
 
 ## Requirements
 
-Python에서 OVITO 모듈을 사용할 수 있어야 합니다.
+The rendering scripts require the OVITO Python module.
 
-GIF 변환에는 `Pillow`가 필요합니다.
+GIF generation requires `Pillow`.
 
 ```bash
 pip install pillow
 ```
 
-OVITO 설치는 사용하는 Python/conda 환경에 맞게 준비해야 합니다.
+Install OVITO in the Python or conda environment used to run the scripts.
 
-## Main Workflow
+## Workflow
 
 ### 1. Prepare Input Data
 
-입력 trajectory 파일은 로컬의 `00_data/` 아래에 둡니다.
+Place input structure or trajectory files under `00_data/`.
 
-예:
+Examples:
 
 ```text
 00_data/XDATCAR
 00_data/xdatcar_shift
 ```
 
-이 디렉터리는 GitHub에 올라가지 않으므로, 다른 환경에서 실행하려면 데이터를 별도로 준비해야 합니다.
+Because `00_data/` is ignored by git, data files must be prepared separately on each machine.
 
 ### 2. Render PNG Frames
 
-`02_script/00_script.sh`의 설정값을 수정합니다.
+Edit the variables in `02_script/00_script.sh`.
 
 ```bash
 INPUT="00_data/xdatcar_shift"
@@ -70,13 +76,13 @@ REPEAT_A3="1"
 FILE_NAME="03_results/03_slice/slice"
 ```
 
-실행:
+Run:
 
 ```bash
 zsh 02_script/00_script.sh
 ```
 
-생성 파일 예:
+Example output files:
 
 ```text
 03_results/03_slice/slice_top_2000.png
@@ -87,43 +93,43 @@ zsh 02_script/00_script.sh
 
 ### 3. Convert PNG Frames to GIF
 
-`02_script/01_script_png_gif.sh`의 설정값을 수정합니다.
+Edit the variables in `02_script/01_script_png_gif.sh`.
 
 ```bash
 RESULT_DIR="03_results/02_slice"
 VIEW="front"
 ```
 
-실행:
+Run:
 
 ```bash
 zsh 02_script/01_script_png_gif.sh
 ```
 
-생성 파일 예:
+Example output:
 
 ```text
 03_results/02_slice/00_slice_front.gif
 ```
 
-## Key Scripts
+## Main Scripts
 
 ### `01_src/00_render_color_by_element.py`
 
-OVITO를 이용해 구조 파일 또는 trajectory의 특정 frame을 렌더링합니다.
+Renders one frame of a structure or trajectory using the OVITO Python API.
 
-주요 기능:
+Main features:
 
-- 원소 종류에 따른 색상 지정
-- 원소별 렌더링 radius 지정
-- XDATCAR frame 선택
-- `a1`, `a2`, `a3` lattice 방향 반복
-- z 범위 filtering
-- top/front/ortho/perspective camera 선택
-- viewport 중심과 크기 조절
-- lattice cell 선 숨김
+- Element-based atom coloring
+- Per-element rendering radius
+- XDATCAR frame selection
+- Periodic repetition along lattice vectors `a1`, `a2`, and `a3`
+- z-range filtering
+- `top`, `front`, `ortho`, and `perspective` camera modes
+- Manual viewport center and size control
+- Optional simulation cell hiding
 
-단일 frame 렌더링 예:
+Single-frame rendering example:
 
 ```bash
 python 01_src/00_render_color_by_element.py 00_data/xdatcar_shift \
@@ -137,7 +143,7 @@ python 01_src/00_render_color_by_element.py 00_data/xdatcar_shift \
   -o 03_results/example_top_2000.png
 ```
 
-색상은 코드 상단의 `ELEMENT_COLOR_MAP`에서 수정합니다. Hex color, RGB 0-255, RGB 0-1 형식을 사용할 수 있습니다.
+Element colors are configured in `ELEMENT_COLOR_MAP` near the top of the script. Hex colors, RGB 0-255 tuples, and RGB 0-1 tuples are supported.
 
 ```python
 ELEMENT_COLOR_MAP = {
@@ -146,9 +152,18 @@ ELEMENT_COLOR_MAP = {
 }
 ```
 
+Element radii are configured in `ELEMENT_RADIUS_MAP`.
+
+```python
+ELEMENT_RADIUS_MAP = {
+    "Li": 1.3,
+    "N":  0.7,
+}
+```
+
 ### `01_src/01_png_to_gif.py`
 
-연속 PNG 파일을 frame 번호 순서대로 읽어 GIF로 변환합니다.
+Reads PNG files in frame-number order and writes a GIF animation.
 
 ```bash
 python 01_src/01_png_to_gif.py \
@@ -163,28 +178,29 @@ python 01_src/01_png_to_gif.py \
 
 ### `01_src/02_shift_coordinate.py`
 
-XDATCAR 계열 direct coordinate를 shift하여 `xdatcar_shift` 형태의 파일을 만드는 보조 스크립트입니다.
+Helper script for shifting direct coordinates from an XDATCAR-style trajectory and writing an `xdatcar_shift`-style output file.
 
 ### `01_src/03_plot_traj.py`
 
-Trajectory 분석 또는 시각화를 위한 보조 plotting 스크립트입니다.
+Helper script for trajectory analysis or plotting.
 
 ## Notes
 
-- Frame index는 0부터 시작합니다.
-- `xdatcar_shift`처럼 lowercase 파일명은 OVITO가 단일 POSCAR처럼 읽는 경우가 있어, 렌더링 스크립트 내부에서 XDATCAR 이름으로 임시 symlink를 만들어 처리합니다.
-- `--view-center`와 `--view-size`는 Cartesian 좌표 기준입니다. XDATCAR/POSCAR 계열에서는 일반적으로 Å 단위입니다.
-- 자세한 script별 옵션 설명은 `01_src/README.md`를 참고하세요.
+- Frame indices are zero-based.
+- `--view-center` and `--view-size` use Cartesian coordinates. For VASP `XDATCAR`/`POSCAR` files, this is typically in angstrom.
+- `--view-size` controls the vertical size of the orthographic viewport. The horizontal range depends on the image aspect ratio.
+- Lowercase filenames such as `xdatcar_shift` may be detected by OVITO as a single POSCAR-like structure. The renderer handles this by creating a temporary `XDATCAR_...` symlink internally.
+- Detailed script-level documentation is available in `01_src/README.md`.
 
 ## Git Usage
 
-작업 전 상태 확인:
+Check the working tree:
 
 ```bash
 git status
 ```
 
-변경사항 저장:
+Commit and push changes:
 
 ```bash
 git add .
@@ -192,13 +208,13 @@ git commit -m "Describe the change"
 git push
 ```
 
-커밋 전 변경사항 되돌리기:
+Discard uncommitted changes:
 
 ```bash
 git restore .
 ```
 
-특정 파일만 되돌리기:
+Restore one file:
 
 ```bash
 git restore 01_src/00_render_color_by_element.py
