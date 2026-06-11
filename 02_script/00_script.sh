@@ -5,7 +5,7 @@ FRAME_INITIAL="2000"
 FRAME_FINAL="2800"
 FRAME_INTERVAL="5"
 Z_MIN="-0.066"
-Z_MAX="0.07"
+Z_MAX="0.071"
 REPEAT_A1="3"
 REPEAT_A2="3"
 REPEAT_A3="1"
@@ -40,6 +40,7 @@ for FRAME in $(seq "$FRAME_INITIAL" "$FRAME_INTERVAL" "$FRAME_FINAL"); do
         --camera top \
         --width "$WIDTH" --height "$HEIGHT" \
         "${VIEW_OPTIONS[@]}" \
+        --transparent-background \
         --hide-cell
 
     python 01_src/00_render_color_by_element.py "$INPUT" \
@@ -50,5 +51,6 @@ for FRAME in $(seq "$FRAME_INITIAL" "$FRAME_INTERVAL" "$FRAME_FINAL"); do
         --camera front \
         --width "$WIDTH" --height "$HEIGHT" \
         "${VIEW_OPTIONS[@]}" \
+        --transparent-background \
         --hide-cell
 done

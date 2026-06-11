@@ -168,6 +168,19 @@ def main():
     parser.add_argument("--height", type=int, default=1400, help="Image height in pixels")
     parser.add_argument("--camera", choices=["perspective", "ortho", "top", "front"], default="perspective")
     parser.add_argument(
+        "--transparent-background",
+        dest="transparent_background",
+        action="store_true",
+        default=True,
+        help="Render the PNG with a transparent background. This is the default.",
+    )
+    parser.add_argument(
+        "--opaque-background",
+        dest="transparent_background",
+        action="store_false",
+        help="Render the PNG with an opaque white background.",
+    )
+    parser.add_argument(
         "--view-center",
         type=float,
         nargs=3,
@@ -250,6 +263,7 @@ def main():
         frame=args.frame,
         renderer=TachyonRenderer(),
         background=(1, 1, 1),
+        alpha=args.transparent_background,
     )
 
     print(f"Saved image to: {args.output}")

@@ -128,6 +128,7 @@ Main features:
 - `top`, `front`, `ortho`, and `perspective` camera modes
 - Manual viewport center and size control
 - Optional simulation cell hiding
+- Transparent PNG background by default
 
 Single-frame rendering example:
 
@@ -189,6 +190,7 @@ Helper script for trajectory analysis or plotting.
 - Frame indices are zero-based.
 - `--view-center` and `--view-size` use Cartesian coordinates. For VASP `XDATCAR`/`POSCAR` files, this is typically in angstrom.
 - `--view-size` controls the vertical size of the orthographic viewport. The horizontal range depends on the image aspect ratio.
+- PNG output uses a transparent background by default. Use `--opaque-background` to render a white background instead.
 - Lowercase filenames such as `xdatcar_shift` may be detected by OVITO as a single POSCAR-like structure. The renderer handles this by creating a temporary `XDATCAR_...` symlink internally.
 - Detailed script-level documentation is available in `01_src/README.md`.
 
