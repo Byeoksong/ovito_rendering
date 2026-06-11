@@ -1,0 +1,15 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Input data and generated outputs
+00_data/
+03_results/
+
+# Archived/reference outputs
+99_archieve/
+
+# Local OS/editor files
+.DS_Store
+.vscode/
+.idea/
