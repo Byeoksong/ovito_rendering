@@ -172,6 +172,14 @@ ELEMENT_TRANSPARENCY_MAP = {
 }
 ```
 
+Tachyon rendering style is configured in the renderer script. These values can be toggled in code without changing CLI options.
+
+```python
+RENDER_AMBIENT_OCCLUSION = True
+RENDER_SHADOWS = True
+RENDER_ANTIALIASING = True
+```
+
 For frame-dependent fade-in rendering, pass `--atom-alpha`. `0.0` is invisible and `1.0` is fully opaque.
 
 ```bash

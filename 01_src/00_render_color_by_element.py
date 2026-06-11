@@ -26,11 +26,21 @@ ELEMENT_RADIUS_MAP = {
 
 # Element -> transparency used for rendering. 0.0 is opaque, 1.0 is invisible.
 ELEMENT_TRANSPARENCY_MAP = {
-    "Li": 0.6,
-    "N":  0.6,
+    "Li": 0.0,
+    "N":  0.0,
 }
 
 DEFAULT_TRANSPARENCY = 0.0
+
+# Tachyon rendering style. Toggle these values in code as needed.
+RENDER_AMBIENT_OCCLUSION = True           # Adds contact shading between nearby/overlapping atoms to emphasize depth.
+RENDER_AMBIENT_OCCLUSION_BRIGHTNESS = 0.8 # Controls ambient occlusion brightness; lower values make shaded regions darker.
+RENDER_AMBIENT_OCCLUSION_SAMPLES = 20     # Number of ambient occlusion samples; higher values reduce noise but render slower.
+RENDER_SHADOWS = True                     # Enables cast shadows from direct lighting; may be less useful with transparent backgrounds.
+RENDER_ANTIALIASING = True                # Smooths jagged pixel edges around atoms.
+RENDER_ANTIALIASING_SAMPLES = 20          # Number of antialiasing samples; higher values smooth edges more but render slower.
+RENDER_DIRECT_LIGHT = True                # Enables directional lighting, making spheres look more three-dimensional.
+RENDER_DIRECT_LIGHT_INTENSITY = 1.0       # Strength of direct lighting; higher values increase highlights and contrast.
 
 
 def normalize_color(color):
@@ -188,6 +198,19 @@ def set_manual_view(vp: Viewport, center: tuple[float, float, float] | None, siz
         vp.fov = size
 
 
+def build_renderer():
+    renderer = TachyonRenderer()
+    renderer.ambient_occlusion = RENDER_AMBIENT_OCCLUSION
+    renderer.ambient_occlusion_brightness = RENDER_AMBIENT_OCCLUSION_BRIGHTNESS
+    renderer.ambient_occlusion_samples = RENDER_AMBIENT_OCCLUSION_SAMPLES
+    renderer.shadows = RENDER_SHADOWS
+    renderer.antialiasing = RENDER_ANTIALIASING
+    renderer.antialiasing_samples = RENDER_ANTIALIASING_SAMPLES
+    renderer.direct_light = RENDER_DIRECT_LIGHT
+    renderer.direct_light_intensity = RENDER_DIRECT_LIGHT_INTENSITY
+    return renderer
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Render a structure colored by each atom's element type."
@@ -300,7 +323,7 @@ def main():
         filename=args.output,
         size=(args.width, args.height),
         frame=args.frame,
-        renderer=TachyonRenderer(),
+        renderer=build_renderer(),
         background=(1, 1, 1),
         alpha=args.transparent_background,
     )
